@@ -25,8 +25,7 @@ WELCOME_MESSAGE = f"<b>Hello! Welcome to 'Three Broomsticks' delivery service.</
 class OrderFood(StatesGroup):
     language = State()
     city = State()
-    fullname = State()
-    contact = State()
+    menu = State()
 
 
 @dp.message(Command(commands=['start']))
@@ -67,15 +66,30 @@ async def process_language(message: Message, state: FSMContext, bot_data: dict):
     await message.answer(text="Choose the city you live",
                          reply_markup=builder.as_markup(resize_keyboard=True))
 
-
 @dp.message(OrderFood.city, F.text)
 async def process_city(message: Message, state: FSMContext):
     await state.update_data(city=message.text)
-    user_data = await state.get_data()
-    print(user_data)
+    # user_data = await state.get_data()
+    await state.set_state(OrderFood.menu)
+    
+    kb = [
+        [types.KeyboardButton(text="🍟 Order")],
+        [types.KeyboardButton(text="🛒 My orders")],
+        [types.KeyboardButton(text="⚙ Settings"), 
+         types.KeyboardButton(text="💥 Discount")],
+        [types.KeyboardButton(text="👩‍🍳 Join our team"), 
+         types.KeyboardButton(text="☎ Feedback")]
+    ]
 
+    await message.answer(text="Our Menu",
+                reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
+
+# @dp.message(OrderFood.menu)
+# async def menu():
+#     pass 
 
 async def main():
     await dp.start_polling(bot, bot_data={})
+
 if __name__ == '__main__':
     asyncio.run(main())
